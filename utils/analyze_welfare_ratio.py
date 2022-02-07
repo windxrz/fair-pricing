@@ -44,11 +44,11 @@ class PricingRatio(nn.Module):
 
 
 def get_welfare_ratio(
-    dis: Distribution, epsilon: float, num_iter: int = 300000, lr: float = 5e-3
+    dis: Distribution, epsilon: float, num_iter: int = 300000, lr: float = 3e-3
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     pricing = PricingRatio(dis, epsilon).to(device)
-    optim = torch.optim.SGD(pricing.parameters(), lr=lr)
+    optim = torch.optim.Adam(pricing.parameters(), lr=lr)
     max_revenue = -10000
     max_i = -1
     for i in tqdm(range(num_iter)):
@@ -63,14 +63,14 @@ def get_welfare_ratio(
         if now_revenue > max_revenue:
             max_revenue = now_revenue
             max_i = i
-        tolerence = 20
+        tolerence = 50
         if i - max_i >= tolerence:
             break
 
     return pricing.result(), pricing.revenue().item(), pricing.consumer_surplus().item()
 
 
-def calc_welfare_ratio(dis: Distribution, lr: float = 5e-3):
+def calc_welfare_ratio(dis: Distribution, lr: float = 3e-3):
     if not os.path.exists("results"):
         os.mkdir("results")
     filename = os.path.join("results", "{}_ratio.json".format(dis.name))

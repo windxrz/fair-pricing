@@ -37,11 +37,11 @@ class PricingGap(nn.Module):
 
 
 def get_welfare_gap(
-    dis: Distribution, epsilon: float, num_iter: int = 300000, lr: float = 5e-3
+    dis: Distribution, epsilon: float, num_iter: int = 300000, lr: float = 3e-3
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     pricing = PricingGap(dis, epsilon).to(device)
-    optim = torch.optim.SGD(pricing.parameters(), lr=lr)
+    optim = torch.optim.Adam(pricing.parameters(), lr=lr)
     max_revenue = -10000
     max_i = -1
     for i in tqdm(range(num_iter)):
@@ -56,14 +56,14 @@ def get_welfare_gap(
         if now_revenue > max_revenue:
             max_revenue = now_revenue
             max_i = i
-        tolerence = 20
+        tolerence = 50
         if i - max_i >= tolerence:
             break
 
     return pricing.result(), pricing.revenue().item(), pricing.consumer_surplus().item()
 
 
-def calc_welfare_gap(dis: Distribution, lr: float = 5e-3):
+def calc_welfare_gap(dis: Distribution, lr: float = 3e-3):
     if not os.path.exists("results"):
         os.mkdir("results")
     filename = os.path.join("results", "{}_gap.json".format(dis.name))
@@ -82,7 +82,7 @@ def calc_welfare_gap(dis: Distribution, lr: float = 5e-3):
     res = dict()
     cands = list(np.arange(0, dis.max_gap(), dis.max_gap() / 50))
     if not "uniform" in dis.name:
-        cands.append(dis.max_gap().item() * 10)
+        cands.append(dis.max_gap() * 10)
     for i, epsilon in enumerate(cands):
         p, r, cs = get_welfare_gap(dis, epsilon, lr=lr)
         print(
@@ -100,7 +100,7 @@ def calc_welfare_gap(dis: Distribution, lr: float = 5e-3):
         f.close()
 
 
-def analyze_critical_point(dis: Distribution, lr: float = 5e-3):
+def analyze_critical_point(dis: Distribution, lr: float = 3e-3):
     filename = os.path.join("results", "{}_gap.json".format(dis.name))
     crit_filename = os.path.join(
         "results", "{}_gap_critical_point.json".format(dis.name)

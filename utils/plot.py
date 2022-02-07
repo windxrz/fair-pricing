@@ -30,7 +30,7 @@ def plot_welfare(dis: Distribution, ax, fontsize: int = 20):
     revenues_gap, consumers_gap = load(dis.name, "gap")
     revenues_ratio, consumers_ratio = load(dis.name, "ratio")
 
-    max_welfare = dis.area_all()
+    max_welfare = dis.area_all().cpu()
     min_revenue = np.min(revenues_gap)
     max_cs = max_welfare - min_revenue
 
@@ -80,19 +80,17 @@ def plot_welfare(dis: Distribution, ax, fontsize: int = 20):
 
 def plot_hazard(ax, dis: Distribution):
     hazards = dict()
-    survival = dict()
     delta = dis.max_gap() / 50000
     for i in np.arange(0, dis.max_gap(), dis.max_gap() / 100):
         hazard = (
             (
-                dis.probability_above(torch.tensor(i))
-                - dis.probability_above(torch.tensor(i + delta))
+                dis.probability_above(torch.tensor(i)).cpu()
+                - dis.probability_above(torch.tensor(i + delta)).cpu()
             )
             / delta
-            / dis.probability_above(torch.tensor(i))
+            / dis.probability_above(torch.tensor(i)).cpu()
         )
-        hazards[i] = hazard
-        survival[i] = dis.probability_above(torch.tensor(i))
+        hazards[i] = hazard.item()
     ax.plot(hazards.keys(), hazards.values())
     if "exponential" in dis.name:
         ax.set_ylim(0, 2)

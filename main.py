@@ -7,23 +7,14 @@ import torch
 from matplotlib import pyplot as plt
 from termcolor import colored
 
+from datasets.analyze_real_dataset import get_real_distribution
 from utils.analyze_welfare_gap import analyze_critical_point, calc_welfare_gap
 from utils.analyze_welfare_ratio import calc_welfare_ratio
-from utils.distributions import BatchOfLogit, Exponential, Logit, PowerLaw, Uniform
+from utils.distributions import Exponential, Logit, PowerLaw, Uniform
 from utils.plot import plot_all
 
 matplotlib.use("Agg")
 matplotlib.rcParams["pdf.fonttype"] = 42
-
-
-def get_real_distribution(dataset):
-    with open(os.path.join("datasets", dataset, "parameters.json"), "r") as f:
-        params = json.loads(f.read())
-        f.close()
-    distribution = BatchOfLogit(params["biases"], params["slope"], dataset)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    distribution.biases = distribution.biases.to(device)
-    return distribution
 
 
 def parse_args():
@@ -50,6 +41,7 @@ def main():
     if not os.path.exists("results/figs"):
         os.makedirs("results/figs")
 
+    lr = 3e-3
     if args.distribution == "uniform":
         dis = Uniform(0, 1)
     elif args.distribution == "exponential":
@@ -62,11 +54,13 @@ def main():
         dis = Logit(4.58, -3.72, name="cake")
     elif args.distribution == "vaccine":
         dis = get_real_distribution("vaccine")
+        lr = 0.1
     elif args.distribution == "auto-loan":
         dis = get_real_distribution("auto-loan")
+        lr = 0.1
 
-    calc_welfare_gap(dis)
-    calc_welfare_ratio(dis)
+    calc_welfare_gap(dis, lr=lr)
+    calc_welfare_ratio(dis, lr=lr)
     if "power_law" in dis.name:
         analyze_critical_point(dis)
 

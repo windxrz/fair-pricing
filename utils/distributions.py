@@ -161,7 +161,7 @@ class Logit(Distribution):
 
 class BatchOfLogit(Distribution):
     def __init__(self, biases, slope, dataset):
-        super().__init__("batch_of_logit_{}".format(dataset))
+        super().__init__(dataset)
         self.biases = torch.tensor(biases, requires_grad=False)
         self.slope = slope
         self.dataset = dataset
@@ -196,4 +196,4 @@ class BatchOfLogit(Distribution):
         return res
 
     def plot_name(self):
-        return "Batch of logit"
+        return self.name
