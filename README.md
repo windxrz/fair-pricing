@@ -17,9 +17,11 @@ Here DISTRIBUTION takes value from `uniform`, `exponential`, `power-law`, `coke`
 ## Citing
 If you find this repo useful for your research, please consider citing the paper.
 ```
-@article{xu2022regulatory,
+@inproceedings{xu2022regulatory,
   title={Regulatory Instruments for Fair Personalized Pricing},
   author={Xu, Renzhe and Zhang, Xingxuan and Cui, Peng and Li, Bo and Shen, Zheyan and Xu, Jiazheng},
-  journal={arXiv preprint arXiv:2202.04245},
+  booktitle={Proceedings of the ACM Web Conference 2022},
+  pages={4--15},
   year={2022}
 }
+```
